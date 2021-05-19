@@ -32,33 +32,37 @@ class Admin{
 	public static void accessToAdmin(String command) {
 		Scanner sc=new Scanner(System.in);
 		Phonebook phonebook=new Phonebook();
-			if(command.equals("find")){
-				System.out.println("Enter phonenumber or name");
-				String nameornumber=sc.nextLine();
-				phonebook.find(nameornumber);
-			}
-			else if(command.equals("add")) {
-				System.out.println("Enter name");
-				String name=sc.nextLine();
-				System.out.println("Enter number");
-				String number=sc.nextLine();
-				System.out.println("Enter emailid");
-				String emailid=sc.nextLine();
-				phonebook.addContact(name, number, emailid);
-			}
-			else if(command.equals("save")) {
-				System.out.println("Enter filename");
-				String filename =sc.nextLine();
-				System.out.println("Enter name");
-				String name=sc.nextLine();
-				System.out.println("Enter number");
-				String number =sc.nextLine();
-				phonebook.saveFile(filename,name,number);
-			}
-			else if(command.equals("download")) {
-				String filename=sc.nextLine();
-				phonebook.downloadFile(filename);
-			}
+		switch(command){
+		case("find"):
+			System.out.println("Enter phonenumber or name");
+			String nameornumber=sc.nextLine();
+			phonebook.find(nameornumber);
+			break;
+		case("add"):
+			System.out.println("Enter name");
+			String name=sc.nextLine();
+			System.out.println("Enter number");
+			String number=sc.nextLine();
+			System.out.println("Enter emailid");
+			String emailid=sc.nextLine();
+			phonebook.addContact(name, number, emailid);
+			break;
+		case("save"):
+			System.out.println("Enter filename");
+			String filename =sc.nextLine();
+			System.out.println("Enter name");
+			String name1=sc.nextLine();
+			System.out.println("Enter number");
+			String number1 =sc.nextLine();
+			phonebook.saveFile(filename,name1,number1);
+			break;
+		case("download"):
+			System.out.println("Enter filename");
+			String filename1=sc.nextLine();
+			phonebook.downloadFile(filename1);
+			break;
+		}
+			
 	}
 }
 class Phonebook{
