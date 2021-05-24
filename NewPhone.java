@@ -2,7 +2,8 @@ package Phonebook;
 
 import java.io.*;
 import java.util.*;
-
+import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 class Admin{
 	Admin(){
@@ -18,11 +19,11 @@ class Admin{
 			do {
 				System.out.println("add");
 				System.out.println("find");
-				System.out.println("save");
 				System.out.println("download");
 				System.out.println("exit");
 				command=sc.nextLine();
 				accessToAdmin(command);
+				
 			}while(command.equals("exit")==false);
 		}
 		else {
@@ -32,125 +33,95 @@ class Admin{
 	public static void accessToAdmin(String command) {
 		Scanner sc=new Scanner(System.in);
 		Phonebook phonebook=new Phonebook();
-		switch(command){
-		case("find"):
-			System.out.println("Enter phonenumber or name");
-			String nameornumber=sc.nextLine();
-			phonebook.find(nameornumber);
-			break;
-		case("add"):
-			System.out.println("Enter name");
-			String name=sc.nextLine();
-			System.out.println("Enter number");
-			String number=sc.nextLine();
-			System.out.println("Enter emailid");
-			String emailid=sc.nextLine();
-			phonebook.addContact(name, number, emailid);
-			break;
-		case("save"):
-			System.out.println("Enter filename");
-			String filename =sc.nextLine();
-			System.out.println("Enter name");
-			String name1=sc.nextLine();
-			System.out.println("Enter number");
-			String number1 =sc.nextLine();
-			phonebook.saveFile(filename,name1,number1);
-			break;
-		case("download"):
-			System.out.println("Enter filename");
-			String filename1=sc.nextLine();
-			phonebook.downloadFile(filename1);
-			break;
-		}
-			
+			switch(command) {
+			case("find"):
+				System.out.println("Enter phonenumber or name");
+				String nameornumber=sc.nextLine();
+				phonebook.find(nameornumber);
+				break;
+			case("add"):
+				System.out.println("Enter name");
+				String name=sc.nextLine();
+				System.out.println("Enter number");
+				String string=sc.nextLine();
+				String[] number=string.split(" ");
+				System.out.println("Enter emailid");
+				String emailid=sc.nextLine();
+				
+				if(name.length()>0 & number.toString().length()>0 & emailid.length()>0)
+					phonebook.addContact(name, number, emailid);
+				else {
+					System.out.println("error occured");
+				}
+				break;
+			case("download"):
+				System.out.println("Enter name");
+				String name1=sc.nextLine();
+				phonebook.downloadFile(name1);
+				break;
+			}
 	}
 }
 class Phonebook{
-	HashMap details=new HashMap();
-	Properties saving=new Properties();
-	ArrayList list=new ArrayList();
-	Phonebook(){
-		this.details=details;
-		this.list=list;
-		this.saving=saving;
-		ArrayList h=new ArrayList();
-		Collections.addAll(h,"harsha","701377389","harsha@gmail.com");
-		ArrayList c=new ArrayList();
-		Collections.addAll(c,"chandu","9849865767","chandu@gmail.com");
-		ArrayList l=new ArrayList();
-		Collections.addAll(l,"lalitha","9848816812","lalitha@gmail.com");
-		ArrayList a=new ArrayList();
-		details.put("harsha",h);
-		details.put("7013773839",h);
-		details.put("chandu",c);
-		details.put("9849865767",c);
-		details.put("lalitha",l);
-		details.put("9848816812",l);
-	
-	}
-	public void addContact(String name,String number,String emailid) {
-		Scanner sc=new Scanner(System.in);
-		list.add(emailid);
-		list.add(number);
-		list.add(name);
+	static HashMap<String,CopyOnWriteArrayList<String>> details=new HashMap<String,CopyOnWriteArrayList<String>>();
+	CopyOnWriteArrayList<String> list=new CopyOnWriteArrayList<String>();
+	static CopyOnWriteArrayList<String> arrlist=new CopyOnWriteArrayList<String>();
+	int count=0;
+	public void addContact(String name,String[] number,String emailid) {
+		Boolean num =false;
+		for(int i=0;i<number.length;i++) {
+			num=arrlist.addIfAbsent(number[i]);
+			if(num==true) {
+				list.add(number[i]);
+				count=count+1;
+			}
+		}
 		if(details.containsKey(name)) {
-			System.out.println("contact already exists");
-			System.out.println("want to replace yes :no");
-			String choice =sc.nextLine();
-			if(choice.equals("yes")){
-				details.put(name,list);
-				System.out.println(name+" details are updated to "+details.get(name));
-			}
-			else {
-				System.out.println("Okay");
-			}
+			System.out.println("Already contact exist");
 		}
-		else {
-			try {
-				details.put(name,list);
-				FileOutputStream fos=new FileOutputStream("details");
-				saving.setProperty(name,name+" "+number+" "+emailid);
-				saving.store(fos,"updated");
-				System.out.println(details.get(name));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		else if(count>0) {
+			list.add(name);
+			list.add(emailid);
 		}
-	}
-	public void downloadFile(String filename) {
-		try {
-			FileInputStream fis =new FileInputStream(filename);
-			saving.load(fis);
-			System.out.println(saving);
+		else if(count<0){
+			System.out.println("Number already exists");
+		}
+		
+		if(count>0 & details.containsKey(name)==false){
+			details.put(name,list);
+			System.out.println("details of "+name+" has been updated");
+			System.out.println(details);
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
+		}
 	}
-	public void saveFile(String filename,String name,String number) {
+	public void downloadFile(String name) {
 		try {
-			FileOutputStream fos=new FileOutputStream(filename);
-			saving.setProperty("name",name);
-			saving.setProperty("number",number);
-			saving.store(fos,"successfully stored");
-			System.out.println(saving);
+			ObjectOutputStream oos =new ObjectOutputStream(new FileOutputStream("details"));
+			oos.writeObject(details.get(name));
+			ObjectInputStream ois =new ObjectInputStream(new FileInputStream("details"));
+			CopyOnWriteArrayList d=(CopyOnWriteArrayList)ois.readObject();
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
 	public void find(String nameornumber) {
-		if(this.details.containsKey(nameornumber)) {
-			System.out.println(details.get(nameornumber));
+		for (Entry<String, CopyOnWriteArrayList<String>> entry: details.entrySet())
+		{
+			for(String s:entry.getValue()) {
+				if(nameornumber.equals(s)) {
+					System.out.println(entry.getValue());
+					}
+				else {
+					System.out.println("Contact details not found");
+					}
+				}
+			}
 		}
-		else {
-			System.out.println("Not found");
-		}
-		
 	}
-}
 class Main{
 	public static void main(String[] args) {
-		Admin a=new Admin();
+		new Admin();
 	}
 }
